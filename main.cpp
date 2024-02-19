@@ -26,7 +26,7 @@ int main()
     INPUT mouseRightDown;
     INPUT mouseRightUp;
 
-    //A key
+    // A key
     aInput.type = INPUT_KEYBOARD;
     aInput.ki.wScan = 0;
     aInput.ki.time = 0;
@@ -34,7 +34,7 @@ int main()
     aInput.ki.wVk = 0x41;
     aInput.ki.dwFlags = 0;
 
-    //Left mouse
+    // Left mouse
     mouseLeftDown.type = INPUT_MOUSE;
     mouseLeftDown.mi.time = 0.0f;
     mouseLeftDown.mi.dwFlags = MOUSEEVENTF_LEFTDOWN;
@@ -43,7 +43,7 @@ int main()
     mouseLeftUp.mi.time = 0.0f;
     mouseLeftUp.mi.dwFlags = MOUSEEVENTF_LEFTUP;
 
-    //Right mouse
+    // Right mouse
     mouseRightDown.type = INPUT_MOUSE;
     mouseRightDown.mi.time = 0.0f;
     mouseRightDown.mi.dwFlags = MOUSEEVENTF_RIGHTDOWN;
@@ -52,6 +52,11 @@ int main()
     mouseRightUp.mi.time = 0.0f;
     mouseRightUp.mi.dwFlags = MOUSEEVENTF_RIGHTUP;
 
+    // minecraft
+    int currentClickCooldown;
+    const int clickCooldown = 5000;
+    const int timestep = 100;
+
     bool minecraftFarming = false;
     bool sendInput1 = false;
     bool sendInputMouse = false;
@@ -59,26 +64,39 @@ int main()
     bool isRunning = true;
     while (isRunning)
     {
-        if (GetKeyState(VK_ESCAPE) & 0x8000) isRunning = false;
-        //if (GetKeyState(0x53) & 0x8000) sendInput1 = true; //S Key
-        if (GetKeyState(0x50) & 0x8000) sendInput1 = true; //P Key
-        if (GetKeyState(0x4C) & 0x8000) sendInputMouse = true; //L Key
-        if (GetKeyState(0x30) & 0x8000) sendInputMouseFast = 0; //0 Key
-        if (GetKeyState(0x31) & 0x8000) sendInputMouseFast = 1; //1 Key
-        if (GetKeyState(0x32) & 0x8000) sendInputMouseFast = 2; //2 Key
-        if (GetKeyState(0x33) & 0x8000) sendInputMouseFast = 3; //3 Key
-        if (GetKeyState(0x34) & 0x8000) sendInputMouseFast = 4; //4 Key
-        if (GetKeyState(0x35) & 0x8000) sendInputMouseFast = 5; //5 Key
-        if (GetKeyState(0x36) & 0x8000) sendInputMouseFast = 6; //6 Key
-        if (GetKeyState(0x37) & 0x8000) sendInputMouseFast = 7; //7 Key
-        if (GetKeyState(0x38) & 0x8000) sendInputMouseFast = 8; //8 Key
-        if (GetKeyState(0x39) & 0x8000) sendInputMouseFast = 9; //9 Key
-        if (GetKeyState(0x4D) & 0x8000) //M Key
+        if (GetKeyState(VK_ESCAPE) & 0x8000)
+            isRunning = false;
+        // if (GetKeyState(0x53) & 0x8000) sendInput1 = true; //S Key
+        if (GetKeyState(0x50) & 0x8000)
+            sendInput1 = true; // P Key
+        if (GetKeyState(0x4C) & 0x8000)
+            sendInputMouse = true; // L Key
+        if (GetKeyState(0x30) & 0x8000)
+            sendInputMouseFast = 0; // 0 Key
+        if (GetKeyState(0x31) & 0x8000)
+            sendInputMouseFast = 1; // 1 Key
+        if (GetKeyState(0x32) & 0x8000)
+            sendInputMouseFast = 2; // 2 Key
+        if (GetKeyState(0x33) & 0x8000)
+            sendInputMouseFast = 3; // 3 Key
+        if (GetKeyState(0x34) & 0x8000)
+            sendInputMouseFast = 4; // 4 Key
+        if (GetKeyState(0x35) & 0x8000)
+            sendInputMouseFast = 5; // 5 Key
+        if (GetKeyState(0x36) & 0x8000)
+            sendInputMouseFast = 6; // 6 Key
+        if (GetKeyState(0x37) & 0x8000)
+            sendInputMouseFast = 7; // 7 Key
+        if (GetKeyState(0x38) & 0x8000)
+            sendInputMouseFast = 8; // 8 Key
+        if (GetKeyState(0x39) & 0x8000)
+            sendInputMouseFast = 9;     // 9 Key
+        if (GetKeyState(0x4D) & 0x8000) // M Key
         {
             SendInput(1, &mouseRightDown, sizeof(INPUT));
-            minecraftFarming = true; 
+            minecraftFarming = true;
         }
-        if (GetKeyState(0x51) & 0x8000) //Q Key
+        if (GetKeyState(0x51) & 0x8000) // Q Key
         {
             SendInput(1, &mouseRightUp, sizeof(INPUT));
             minecraftFarming = false;
@@ -110,12 +128,20 @@ int main()
             SendInput(1, &mouseLeftDown, sizeof(INPUT));
             SendInput(1, &mouseLeftUp, sizeof(INPUT));
         }
-        if(minecraftFarming)
+
+        if (minecraftFarming)
         {
-            SendInput(1, &mouseLeftDown, sizeof(INPUT));
-            sleep_for(std::chrono::milliseconds(100));
-            SendInput(1, &mouseLeftUp, sizeof(INPUT));
-            sleep_for(std::chrono::milliseconds(5000));
+            if (currentClickCooldown > 0)
+            {
+                currentClickCooldown -= timestep;
+            }
+            else
+            {
+                SendInput(1, &mouseLeftDown, sizeof(INPUT));
+                SendInput(1, &mouseLeftUp, sizeof(INPUT));
+                currentClickCooldown = clickCooldown;
+            }
+            sleep_for(std::chrono::milliseconds(timestep));
         }
     }
     SendInput(1, &mouseRightUp, sizeof(INPUT));
